@@ -129,22 +129,8 @@ jobs:
             npm audit fix --audit-level=critical --force
             exit 1
       - slack/notify:
-          custom: |
-            {
-              "blocks": [
-                {
-                  "type": "section",
-                  "fields": [
-                    {
-                      "type": "plain_text",
-                      "text": "*This is a text notification*",
-                      "emoji": true
-                    }
-                  ]
-                }
-              ]
-            }
-          event: always
+          event: fail
+          template: basic_fail_1
 
 #   deploy-infrastructure:
 #     docker:
