@@ -127,9 +127,6 @@ jobs:
             cd frontend
             npm install
             npm audit fix --audit-level=critical --force
-      - notify:
-          event: always
-          template: basic_fail_1
 
 #   deploy-infrastructure:
 #     docker:
