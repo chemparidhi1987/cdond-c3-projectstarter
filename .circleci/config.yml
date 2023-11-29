@@ -139,7 +139,6 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
-      - dependencies
       # Checkout code from git
       - run:
           name: Ensure back-end infrastructure exists
