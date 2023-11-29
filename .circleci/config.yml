@@ -136,29 +136,27 @@ jobs:
 
   deploy-infrastructure:
     docker:
-      # Docker image here that supports AWS CLI
-      image: amazon/aws-cli
+      - image: amazon/aws-cli
     steps:
-      # Checkout code from git
       - checkout
       - dependencies
-      - run: yum install -y tar gzip
+      # Checkout code from git
       - run:
           name: Ensure back-end infrastructure exists
           command: |
             aws cloudformation deploy \
-              --template-file .circleci/files/backend.yml \
-              --tags project=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} \
-              --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} \
-              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:7}  
+            --template-file .circleci/files/backend.yml \
+            --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} \
+            --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:7} \
+            --tags project=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Ensure front-end infrastructure exist
           command: |
             aws cloudformation deploy \
-              --template-file .circleci/files/frontend.yml \
-              --tags project=udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7} \
-              --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7} \
-              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:7}  
+            --template-file .circleci/files/frontend.yml \
+            --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7} \
+            --parameter-overrides ID=${CIRCLE_WORKFLOW_ID:0:7} \
+            --tags project=udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Add back-end ip to ansible inventory
           command: |
@@ -170,7 +168,6 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-      # Here's where you will add some code to rollback on failure 
       - destroy-environment:
           workflow_id: '${CIRCLE_WORKFLOW_ID:0:7}'     
 
