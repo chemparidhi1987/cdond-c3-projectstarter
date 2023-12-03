@@ -212,7 +212,12 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update --no-cache tar gzip nodejs npm awscli curl
+            apk add --update --no-cache tar gzip nodejs npm curl
+            apk add curl
+            apk add --upgrade bash
+            apk add --update ansible
+            apk add openssh-client
+            pip3 install awscli
       - restore_cache:
           keys:
             - build-backend
