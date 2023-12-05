@@ -289,7 +289,7 @@ jobs:
                     
   deploy-backend:
     docker:
-      - image: python:3.7-alpine3.16
+      - image: cimg/base:stable
         environment:
           NODE_ENV: "production"
           VERSION: "1"
@@ -318,10 +318,6 @@ jobs:
           name: Deploy backend
           command: |
             cd backend
-            npm install -g npm
-            npm audit
-            npm install <package-name>@latest
-            npm audit fix
             npm run build
             cd ..
             tar -C backend -czvf artifact.tar.gz .
