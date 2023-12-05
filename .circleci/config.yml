@@ -67,7 +67,7 @@ commands:
           command: |
             curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
             sudo apt install -y nodejs  
-                     
+
 jobs:
   build-frontend:
     docker:
@@ -350,6 +350,7 @@ jobs:
           name: Deploy backend
           command: |
             cd backend
+            npm install -g typescript
             npm run build
             cd ..
             tar -C backend -czvf artifact.tar.gz .
