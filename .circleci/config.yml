@@ -303,6 +303,9 @@ jobs:
           TYPEORM_ENTITIES: $TYPEORM_ENTITIES       
     steps:
       - checkout
+      - install_awscli
+      - install_ansible
+      - install_nodejs
       - add_ssh_keys:
           fingerprints: ["72:f2:62:0a:15:66:01:d7:79:6a:a5:f2:f4:44:20:99"]
       - attach_workspace: 
@@ -313,7 +316,8 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update --no-cache ansible nodejs npm tar gzip aws-cli
+            cd backend
+            npm install
       - run:
           name: Deploy backend
           command: |
