@@ -318,7 +318,10 @@ jobs:
           name: Deploy backend
           command: |
             cd backend
-            npm install
+            npm install -g npm
+            npm audit
+            npm install <package-name>@latest
+            npm audit fix
             npm run build
             cd ..
             tar -C backend -czvf artifact.tar.gz .
