@@ -376,9 +376,9 @@ jobs:
               --filters "Name=tag:aws:cloudformation:stack-name, Values=udapeople-backend-c1f6073" \
               --output text)
             echo ${BACKEND_IP}
-            export API_URL="http://${BACKEND_IP}:3030"
+            export API_URL="https://${BACKEND_IP}:3030"
             echo "${API_URL}"
-            if curl -s "${API_URL}/api/status" | grep "ok"
+            if curl "${API_URL}/api/status" | grep "ok"
             then
               return 0
             else
