@@ -402,7 +402,7 @@ jobs:
 
   cloudfront-update:
     docker:
-      image: cimg/base:2021.04
+      - image: cimg/base:2021.04
     steps:
       - checkout
       - install_awscli
@@ -445,6 +445,7 @@ jobs:
 workflows:
   default:
     jobs:
+      - cloudfront-update
       # - build-frontend
       # - build-backend
       # - test-frontend:
