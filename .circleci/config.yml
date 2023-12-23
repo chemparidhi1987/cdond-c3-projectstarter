@@ -130,10 +130,9 @@ jobs:
             npm audit fix --audit-level=critical --force
             npm audit fix --audit-level=critical --force
             npm audit --audit-level=critical
-            return 1
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
+      # - slack/notify:
+      #     event: fail
+      #     template: basic_fail_1
   deploy-infrastructure:
     docker:
       - image: amazon/aws-cli
@@ -181,23 +180,31 @@ jobs:
           name: Install dependencies
           command: |
             apk add --update --no-cache tar gzip ansible aws-cli
+      - run:
+          name: Add .env vars to backend distro
+          command: |
+            touch ~/project/backend/.env
+            echo ENVIRONMENT=production > backend/.env
+            echo TYPEORM_CONNECTION=postgres >> backend/.env
+            echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> backend/.env
+            echo TYPEORM_HOST=$TYPEORM_HOST >> backend/.env
+            echo TYPEORM_PORT=$TYPEORM_PORT >> backend/.env
+            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> backend/.env
+            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> backend/.env
+            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> backend/.env
+            echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> "backend/.env"
+            echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> "backend/.env"
+            echo NODE_ENV=development >> "backend/.env"
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .circleci/ansible/inventory.txt
+            - backend/.env
       - attach_workspace:
           at: ~/
       - run:
           name: Configure server
           command: |
-            # # add environment variables to server
-            # echo ENVIRONMENT=production > backend/.env
-            # echo TYPEORM_CONNECTION=$TYPEORM_CONNECTION >> backend/.env
-            # echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> backend/.env
-            # echo TYPEORM_ENTITIES=$TYPEORM_ENTITIES >> backend/.env
-            # echo TYPEORM_HOST=$TYPEORM_HOST >> backend/.env
-            # echo TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS >> backend/.env
-            # echo TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR >> backend/.env
-            # echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> backend/.env
-            # echo TYPEORM_PORT=$TYPEORM_PORT >> backend/.env
-            # echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> backend/.env
-            # cat backend/.env
             cd .circleci/ansible
             cat inventory.txt
             ansible-playbook -i inventory.txt configure-server.yml
@@ -208,27 +215,34 @@ jobs:
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
   run-migrations:
-    docker:
-      - image: circleci/node:13.8.0 
+    executor: node
     steps:
       - checkout
-      - run:
-          name: Install dependencies
-          command: |
-            sudo apt install -y tar gzip curl
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            unzip -qq awscliv2.zip
-            sudo ./aws/install
-      - restore_cache:
-          keys: [backend-build]
       - attach_workspace:
-          at: ~/
+          at: .
+      - run:
+          name: Install AWS CLI dependencies
+          working_directory: /tmp
+          command: |
+            sudo apt-get update && sudo apt-get install -yy less
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
       - run:
           name: Run migrations
+          no_output_timeout: 30m
+          working_directory: ./backend
           command: |
-            cd backend
             npm install
-            npm run migrations >> migrations.txt
+            npm run migrations > migration.log
+            export migration_status=$(cat migration.log | grep -c "has been executed successfully")
+            tar -zcvf ~/backend.tar.gz .
+            ls
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - backend.tar.gz
+            - migration.log
       - run:
           name: Send migration results to kvdb
           command: |
@@ -238,6 +252,37 @@ jobs:
             fi
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+  # run-migrations:
+  #   docker:
+  #     - image: circleci/node:13.8.0 
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         name: Install dependencies
+  #         command: |
+  #           sudo apt install -y tar gzip curl
+  #           curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+  #           unzip -qq awscliv2.zip
+  #           sudo ./aws/install
+  #     - restore_cache:
+  #         keys: [backend-build]
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run:
+  #         name: Run migrations
+  #         command: |
+  #           cd backend
+  #           npm install
+  #           npm run migrations >> migrations.txt
+  #     - run:
+  #         name: Send migration results to kvdb
+  #         command: |
+  #           if grep -q "success" ~/project/backend/migrations.txt
+  #           then
+  #             curl --insecure https://kvdb.io/JHDcR9juigb3FjrqMT2mgw/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '1'
+  #           fi
+  #     - destroy-environment:
+  #         workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
   deploy-frontend:
     docker:
       - image: python:3.7-alpine3.16
