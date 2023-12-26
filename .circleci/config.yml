@@ -236,10 +236,9 @@ jobs:
           command: |
             echo "~/project/backend/.env"
             cat ~/project/backend/.env
-            echo "backend/.env"
-            cat backend/.env
             npm install
             npm run migrations > migration.log
+            cat migration.log
             export migration_status=$(cat migration.log | grep -c "has been executed successfully")
             tar -zcvf ~/backend.tar.gz .
             ls
