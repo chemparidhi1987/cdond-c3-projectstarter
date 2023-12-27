@@ -216,7 +216,7 @@ jobs:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
   run-migrations:
     docker:
-      - image: circleci/node:13.8.0
+      - image: sleavely/node-awscli:14.x
     steps:
       - checkout
       - attach_workspace:
@@ -254,8 +254,8 @@ jobs:
             then
               curl --insecure https://kvdb.io/JHDcR9juigb3FjrqMT2mgw/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '1'
             fi
-      # - destroy-environment:
-      #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
   # run-migrations:
   #   docker:
   #     - image: circleci/node:13.8.0 
