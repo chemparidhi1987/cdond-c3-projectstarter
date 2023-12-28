@@ -1,9 +1,19 @@
+1- URL01
 Public Url to GitHub repository (not private) [URL01]
     https://github.com/chemparidhi1987/cdond-c3-projectstarter
 
+2- URL02
 Public URL for your S3 Bucket (aka, your green candidate front-end) [URL02]
-    http://udapeople-7544ee3.s3-website-us-east-1.amazonaws.com
+    http://udapeople-32ae2ce.s3-website-us-east-1.amazonaws.com
 
+3- URL03
 Evidence of deployed and functioning Frontend in CloudFront. [URL03]
-    http://d2yrvgjur2kbh0.cloudfront.net/#/employees
+    http://d30fi4wn0i4ufb.cloudfront.net/#/employees
     
+4- URL04
+Evidence of healthy back-end application
+    http://54.174.77.194:3030/api/status
+
+5- URL05
+Evidence of Prometheus Server
+    http://ec2-3-80-177-82.compute-1.amazonaws.com:9090/
